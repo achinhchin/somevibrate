@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'dart:math';
+import 'package:flutter/services.dart';
 import 'package:vibration/vibration.dart';
 
 class HomePage extends StatefulWidget {
@@ -33,15 +34,18 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> updateLocation() async {
     if (locatonPermission) {
+      // check location Permission of your phone
       Geolocator.getPositionStream().listen((ps) {
+        // get stream
         setState(() {
           position = ps;
         });
-        if (track)
+        if (track) {
           mapController.move(
             LatLng(ps.latitude, ps.longitude),
             mapController.camera.zoom,
           );
+        }
         if (mrk != null &&
             Geolocator.distanceBetween(
                     mrk![1], mrk![2], ps.latitude, ps.longitude) <=
@@ -49,7 +53,7 @@ class _HomePageState extends State<HomePage> {
             !show) alert();
       });
     } else {
-      await getLocationPermission();
+      await getLocationPermission(); // get locaiton Permission
       Future.delayed(const Duration(seconds: 1), updateLocation);
     }
   }
@@ -63,12 +67,8 @@ class _HomePageState extends State<HomePage> {
           context: context,
           builder: (context) {
             Timer pd = Timer.periodic(
-              Duration(seconds: 2),
-              (t) => Vibration.vibrate(
-                amplitude: 128,
-                repeat: 5,
-                duration: 1000,
-              ),
+              const Duration(seconds: 2),
+              (t) => HapticFeedback.vibrate(),
             );
             return AlertDialog(
               title: const Text('You have reached your destination.'),
@@ -158,11 +158,11 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () => setState(() {
                           mrk![0] += 25;
                         }),
-                        child: Icon(Icons.add),
                         backgroundColor:
                             Theme.of(context).colorScheme.tertiaryContainer,
+                        child: const Icon(Icons.add),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 10,
                       ),
                       FloatingActionButton(
@@ -173,13 +173,13 @@ class _HomePageState extends State<HomePage> {
                             });
                           }
                         },
-                        child: Icon(Icons.remove),
                         backgroundColor:
                             Theme.of(context).colorScheme.tertiaryContainer,
+                        child: const Icon(Icons.remove),
                       ),
                     ],
                   ),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 if (mrk != null)
